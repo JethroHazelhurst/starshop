@@ -35,7 +35,15 @@ class StarshipApiController extends AbstractController
                 'Kathryn Journeyway',
                 'under construction',
             ),
+            new Starship(
+                3,
+                'Test Ship',
+                'Test Ship',
+                'Test Captain',
+                'Test description',
+            ),
         ];
+
         return $this->json($starships);
     }
 }
