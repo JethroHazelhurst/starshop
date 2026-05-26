@@ -37,10 +37,10 @@ class StarshipApiController extends AbstractController
             ),
             new Starship(
                 3,
-                'Test Ship 5',
-                'Test Ship 5',
-                'Test Captain 5',
-                'Test description 5',
+                'Test Ship 6',
+                'Test Ship 6',
+                'Test Captain 6',
+                'Test description 6',
             ),
         ];
 
