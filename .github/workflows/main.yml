@@ -3,13 +3,16 @@ name: Deploy to Cloudways
 on:
   push:
     branches:
+      - staging
       - main
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy Symfony app
+  deploy-staging:
+    name: Deploy to staging
+    if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
+    environment: staging
 
     steps:
       - name: Deploy over SSH
@@ -22,14 +25,45 @@ jobs:
           script: |
             set -e
 
-            cd /home/1325249.cloudwaysapps.com/rycjmxkenn/public_html
+            cd ${{ secrets.CLOUDWAYS_PATH }}
 
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin ${{ secrets.CLOUDWAYS_BRANCH }}
+            git reset --hard origin/${{ secrets.CLOUDWAYS_BRANCH }}
 
-            composer install --optimize-autoloader
+            composer install --no-dev --optimize-autoloader
 
-            php bin/console cache:clear --env=dev
-            php bin/console cache:warmup --env=dev
+            php bin/console tailwind:build --env=prod
+            php bin/console cache:clear --env=prod
+            php bin/console cache:warmup --env=prod
+
+            chmod -R ug+rw var
+
+  deploy-production:
+    name: Deploy to production
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.CLOUDWAYS_HOST }}
+          username: ${{ secrets.CLOUDWAYS_USER }}
+          password: ${{ secrets.CLOUDWAYS_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+
+            cd ${{ secrets.CLOUDWAYS_PATH }}
+
+            git fetch origin ${{ secrets.CLOUDWAYS_BRANCH }}
+            git reset --hard origin/${{ secrets.CLOUDWAYS_BRANCH }}
+
+            composer install --no-dev --optimize-autoloader
+
+            php bin/console tailwind:build --env=prod
+            php bin/console cache:clear --env=prod
+            php bin/console cache:warmup --env=prod
 
             chmod -R ug+rw var
